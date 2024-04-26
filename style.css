@@ -1,0 +1,99 @@
+body {
+  background-color: #e6e6e6;
+  padding-bottom: 100px;
+}
+
+.navbar-toggler {
+  border: none;
+  outline: none;
+  &:focus {
+    box-shadow: none;
+    border: 1px solid #c3bfbf;
+  }
+}
+
+/* .navbar-collapse.collapse.show {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: start;
+  } */
+
+#postsWrapper.container,
+#onePostDetails.container,
+#userProfile.container {
+  width: 65%;
+}
+
+@media (max-width: 767px) {
+  #postsWrapper.container,
+  #onePostDetails.container,
+  #userProfile.container {
+    width: 100%;
+  }
+}
+
+.Profile-img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+  box-shadow: 0 0 4px #00000069;
+}
+
+.hide {
+  display: none;
+}
+.show {
+  display: block;
+}
+
+[title="add post"] {
+  transition: all 0.7s;
+}
+
+[title="add post"]:hover i {
+  color: #e6e6e6;
+}
+
+.btn:hover {
+  transition: all 0.4s;
+  scale: 1.1;
+}
+
+.user-pro-pic {
+    width: 120px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    box-shadow: 0 0 13px #00000028;
+    object-fit: contain;
+    max-width: 100%;
+}
+
+.nav-link.active {
+    color: #335bc2 !important;
+}
+
+.nav-link:hover {
+    transition: all .3s ease;
+    color: #335bc2 !important;
+    cursor: pointer;
+}
+
+@media (min-width:992px) {
+    .nav-link.active {
+        border-bottom: 2px solid #335bc2;
+    }
+    
+    .nav-link:hover {
+        scale: 1.1;
+    } 
+}
+.click-to-user-page {
+    color: rgb(7, 63, 64);
+    
+    &:hover {
+        transition: color .4s ease-out;
+        color: #009DA1;
+    }
+}

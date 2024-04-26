@@ -1,25 +1,20 @@
-
 let Status = "home";
 
 function handlePagination(metaData) {
-
-  function scrollListener (){
+  function scrollListener() {
     if (
       window.scrollY + window.innerHeight > document.body.scrollHeight - 1200 &&
       window.scrollY + window.innerHeight < document.body.scrollHeight - 100 &&
       metaData.current_page <= metaData.last_page &&
       Status == "home"
     ) {
-
-    
       getALlPosts(metaData.current_page + 1);
-        
-      window.removeEventListener("scroll", scrollListener );
+
+      window.removeEventListener("scroll", scrollListener);
     }
   }
 
-
-  window.addEventListener("scroll", scrollListener );
+  window.addEventListener("scroll", scrollListener);
 }
 
 async function getALlPosts(currentPage = 1) {
@@ -33,11 +28,11 @@ async function getALlPosts(currentPage = 1) {
       if (currentPage == 1) {
         listPosts(json, true);
         chekerLogged();
-        handlePostEdit ();
+        handlePostEdit();
       } else {
         listPosts(json);
         chekerLogged();
-        handlePostEdit ();
+        handlePostEdit();
       }
 
       handlePagination(json.meta);
@@ -59,35 +54,49 @@ function listPosts(json, clear = false) {
   }
 
   postsData.forEach((post) => {
-
-    if (!JSON.stringify(post).includes("<script>")) {
-
+    if (
+      !JSON.stringify(post).includes("script") &&
+      !JSON.stringify(post).includes("alert")
+    ) {
       postsWrapper.innerHTML += `
-      <div  class="card my-4 shadow-sm">
+    <div  class="card my-4 shadow-sm">
       <div class="mt-3 d-flex align-items-center">
-        <img
-          src="${
-            typeof post.author.profile_image !== "object"
-              ? post.author.profile_image
-              : "./images/anonymous-user.jpg"
-          }"
-          alt="Profile"
-          class="Profile-img ms-3 "
-        />
-        <span class="ms-2 align-middle fs-4 fw-bold">@${
-          post.author.username
-        }</span>
+        <span 
+          class="click-to-user-page"
+          style="cursor: pointer;" 
+          onclick="handleProfilePage(${post.author.id})"
+        >
+          <img
+            src="${
+              typeof post.author.profile_image !== "object"
+                ? post.author.profile_image
+                : "./images/anonymous-user.jpg"
+            }"
+            alt="Profile"
+            class="Profile-img ms-3 "
+          />
+          <span class="ms-2 align-middle fs-4 fw-bold">@${
+            post.author.username
+          }</span>
+        </span>
         <div 
         data-current-post-id="${post.id}" 
         data-current-post-title="${post.title}" 
         data-current-post-body="${post.body}"  
         data-author-id='${
           post.author.id
-        }' class="px-3 editBtn" style="flex-grow:1; display:flex; justify-content:end;">
-          <button class="btn btn-primary">
+        }' class="px-3 align-items-center editBtn" style="flex-grow:1; display:flex; justify-content:end; ">
+        
+        <button class="btn btn-sm btn-primary">
           edit
           <i class="fa-solid fa-pen-clip" style="color: #d4d6d8;"></i>
-          </button>
+        </button>
+        
+        <button class="mx-1 btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal">
+          delete
+          <i class="fa-regular fa-trash-can" style="color: #d4d6d8;"></i>
+        </button>
+
         </div>
       </div>
       <hr />
@@ -97,7 +106,7 @@ function listPosts(json, clear = false) {
        style="background: #F1F1F1">
           <img
               src="${post.image}"
-              class=" card-img-top rounded-4 ${
+              class="  card-img-top rounded-3 ${
                 typeof post.image !== "object" ? "" : "d-none"
               }"
               style="max-height: 370px; max-width: 98%; object-fit: contain; cursor:pointer;"
@@ -109,9 +118,9 @@ function listPosts(json, clear = false) {
         })" title='single post page' style='cursor:pointer;' class="card-title text-black-50">${
         post.created_at
       }</h6>
-        <h4 style='cursor:pointer;' onclick="postDetailsReq(${
-          post.id
-        })" >${post.title || ""}</h4>
+        <h4 style='cursor:pointer;' onclick="postDetailsReq(${post.id})" >${
+        post.title || ""
+      }</h4>
         <p onclick="postDetailsReq(${
           post.id
         })" style='cursor:pointer;' class="card-text">
@@ -231,6 +240,7 @@ function chekerLogged() {
     addProfilePicAndName();
     addCommentBtn?.classList.remove("d-none");
     handleEditBtn();
+    handleDeletePost();
   } else {
     loginAndRegister.style.display = "block";
     document.getElementById("logout").classList.remove("show");
@@ -238,6 +248,7 @@ function chekerLogged() {
     checkIfUser.classList.add("d-none");
     addCommentBtn?.classList.add("d-none");
     handleEditBtn();
+    handleDeletePost();
   }
 }
 chekerLogged();
@@ -255,53 +266,107 @@ function handleEditBtn() {
 
   userEditBtns.forEach((btn) => {
     btn.classList.remove("d-none");
-    btn.children[0].setAttribute('data-edit-click','true');
+    btn.children[0].setAttribute("data-edit-click", "true");
+
+    //handle Delete Post
+    btn.children[1].setAttribute("data-delete-click", "true");
   });
 }
 
+// delete post
+function handleDeletePost() {
+  let deleteBtns = document.querySelectorAll("[data-delete-click ='true']");
 
+  deleteBtns.forEach((btn) => {
+    let currentPostId = btn.parentElement.dataset.currentPostId;
 
-function handlePostEdit () {
+    btn.addEventListener("click", () => {
+      document
+        .getElementById("acceptDelete")
+        .setAttribute("data-delete-id", currentPostId);
+
+      AcceptDeleteReq();
+    });
+  });
+}
+
+function AcceptDeleteReq() {
+  document.getElementById("acceptDelete").addEventListener("click", () => {
+    let postId = document.getElementById("acceptDelete").dataset.deleteId;
+    deleteReq(postId);
+  });
+}
+
+async function deleteReq(postId) {
+  let token = localStorage.getItem("token");
+
+  try {
+    let response = await fetch(
+      `https://tarmeezacademy.com/api/v1/posts/${postId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    let json = await response.json();
+
+    if (json.message) {
+      throw json.message;
+    } else {
+      document.getElementById("closeDeleteModal").click();
+      alertComponent("Deleted successfully 👌", "success");
+    }
+
+    if (Status !== "home") {
+      switchPages("home");
+      getALlPosts(1);
+    } else {
+      getALlPosts(1);
+    }
+  } catch (error) {
+    alertComponent(`${error} ⚠️`, "warning");
+  }
+}
+
+// edit post
+
+function handlePostEdit() {
   let editBtns = document.querySelectorAll("[data-edit-click ='true']");
 
   editBtns.forEach((btn) => {
-   
-    
-    btn.addEventListener("click", ()=>{
+    btn.addEventListener("click", () => {
       let currentPostId = btn.parentElement.dataset.currentPostId;
       let currentPostTitle = btn.parentElement.dataset.currentPostTitle;
       let currentPostBody = btn.parentElement.dataset.currentPostBody;
 
-      document.getElementById('submitCreatePost').setAttribute('data-current-post-id', currentPostId );
-      showEditModal(currentPostTitle , currentPostBody)
-      
-    })
-  })
+      document
+        .getElementById("submitCreatePost")
+        .setAttribute("data-current-post-id", currentPostId);
+      showEditModal(currentPostTitle, currentPostBody);
+    });
+  });
 }
 
-
-
-function showEditModal ( postTitle , postBody  ) {
-
-  document.getElementById('addPost').click();
-  document.getElementById('PostModalTile').innerHTML = "Edit Post";
-  document.getElementById('submitCreatePost').innerHTML = 'Edit';
-  document.getElementById('postTitle').value = postTitle;
-  document.getElementById('postBody').innerHTML = postBody;
- 
+function showEditModal(postTitle, postBody) {
+  document.getElementById("addPost").click();
+  document.getElementById("PostModalTile").innerHTML = "Edit Post";
+  document.getElementById("submitCreatePost").innerHTML = "Edit";
+  document.getElementById("postTitle").value = postTitle;
+  document.getElementById("postBody").innerHTML = postBody;
 }
 
+// Reset add Post Modal info
 
-// Reset add Post Modal info 
-
-document.getElementById('addPost').addEventListener('click' , ()=>{
-
-  document.getElementById('PostModalTile').innerHTML = "Create a new post";
-  document.getElementById('submitCreatePost').innerHTML = 'Create';
-  document.getElementById('postTitle').value = '';
-  document.getElementById('postBody').innerHTML = '';
-})
-
+document.getElementById("addPost").addEventListener("click", () => {
+  document.getElementById("PostModalTile").innerHTML = "Create a new post";
+  document.getElementById("submitCreatePost").innerHTML = "Create";
+  document.getElementById("postTitle").value = "";
+  document.getElementById("postBody").innerHTML = "";
+});
 
 function addProfilePicAndName() {
   const userNameToShow = document.getElementById("userName");
@@ -345,9 +410,10 @@ function alertComponent(Content, color) {
   }, 5000);
 }
 
-async function createPostReq(title, body, imgs ) {
-
-  let submitPostStatus = document.getElementById('submitCreatePost').innerHTML.trim();
+async function createPostReq(title, body, imgs) {
+  let submitPostStatus = document
+    .getElementById("submitCreatePost")
+    .innerHTML.trim();
   let token = localStorage.getItem("token");
 
   let formData = new FormData();
@@ -358,8 +424,7 @@ async function createPostReq(title, body, imgs ) {
     formData.append("image", imgs[0]);
   }
 
-  if (submitPostStatus == 'Create') {
-
+  if (submitPostStatus == "Create") {
     try {
       let response = await fetch("https://tarmeezacademy.com/api/v1/posts", {
         method: "POST",
@@ -381,22 +446,24 @@ async function createPostReq(title, body, imgs ) {
     } catch (error) {
       alertComponent(`${error} 😢`, "warning");
     }
+  } else {
+    let editCurrentPostId =
+      document.getElementById("submitCreatePost").dataset.currentPostId;
 
-  }else{
-
-    let editCurrentPostId = document.getElementById('submitCreatePost').dataset.currentPostId;
-    
-    formData.append("_method" , "PUT");
+    formData.append("_method", "PUT");
 
     try {
-      let response = await fetch(`https://tarmeezacademy.com/api/v1/posts/${editCurrentPostId}`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      let response = await fetch(
+        `https://tarmeezacademy.com/api/v1/posts/${editCurrentPostId}`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
       let data = await response.json();
 
@@ -405,13 +472,17 @@ async function createPostReq(title, body, imgs ) {
       } else {
         document.getElementById("closePostModal").click();
         alertComponent("updated Post Successfully 👌", "success");
-        getALlPosts(1);
+
+        if (Status == "home") {
+          getALlPosts(1);
+        } else {
+          postDetailsReq(editCurrentPostId);
+        }
       }
     } catch (error) {
       alertComponent(`${error} 😢`, "warning");
     }
   }
-
 }
 
 document.getElementById("submitCreatePost").addEventListener("click", () => {
@@ -430,6 +501,7 @@ async function postDetailsReq(postId) {
     let json = await response.json();
     showPostDetails(json, postId);
     chekerLogged();
+    handlePostEdit();
   } catch (error) {
     console.warn(error);
   }
@@ -442,6 +514,7 @@ function showPostDetails(postAllData, postId) {
   const comments = postAllData.data.comments;
 
   onePostDetails.innerHTML = `
+    <h2>${postData.author.username} 's post</h2>
     <div class="card my-4 shadow-sm">
       <div class="mt-3 d-flex align-items-center">
         <img src="${
@@ -451,23 +524,31 @@ function showPostDetails(postAllData, postId) {
         }" alt="Profile" class="Profile-img ms-3" />
         <span class="ms-2 align-middle h4">@${postData.author.username}</span>
         <div 
-        onclick='handlePostEdit(${postId})'
         data-current-post-id="${postData.id}" 
         data-current-post-title="${postData.title}" 
         data-current-post-body="${postData.body}"
         data-author-id='${
           postData.author.id
         }' class="px-3 editBtn" style="flex-grow:1; display:flex; justify-content:end;">
-          <button class="btn  btn-primary">
-          edit
-          <i class="fa-solid fa-pen-clip" style="color: #d4d6d8;"></i>
+          
+          <button class="btn btn-sm btn-primary">
+            edit
+            <i class="fa-solid fa-pen-clip" style="color: #d4d6d8;"></i>
           </button>
+
+          <button class="mx-1 btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal">
+          delete
+          <i class="fa-regular fa-trash-can" style="color: #d4d6d8;"></i>
+          </button>
+
         </div>
       </div>
       <hr />
       <div class="d-flex justify-content-center" style="background: #f1f1f1">
         <img
-          class="${typeof postData.image !== "object" ? "" : "d-none"}"
+          class="${
+            typeof postData.image !== "object" ? "" : "d-none"
+          } rounded-3"
           src="${postData.image}"
           style="max-height: 370px; max-width: 98%; object-fit: contain "
           alt="Post Image"
@@ -501,7 +582,7 @@ function showPostDetails(postAllData, postId) {
   comments.forEach((comment) => {
     document.getElementById("commentsWarapper").innerHTML += `
       <hr />
-      <div class="px-2 py-2 rounded-3 shadow" style="background: #eee">
+      <div class="border border-secondary border-opacity-25 px-2 py-2 rounded-3 shadow" style="background: #eee">
         <div class="mb-1 d-flex gap-2 align-items-center">
           <img src="${
             typeof comment.author.profile_image != "object"
@@ -518,23 +599,46 @@ function showPostDetails(postAllData, postId) {
   });
 
   switchPages("postPage");
- 
 }
 
 function switchPages(Updatestatus) {
   const postsWrapper = document.getElementById("postsWrapper");
   const onePostDetails = document.getElementById("onePostDetails");
+  const userProfilePage = document.getElementById("userProfilePage");
   const addPost = document.getElementById("addPost");
+  const switchToHome = document.getElementById("switchToHome");
+
+  //update page status
   Status = Updatestatus;
+
+  //remove active class from all links
+  document.querySelectorAll(".nav-link").forEach((link) => {
+    link.classList.remove("active");
+  });
+
+  // select links
+  const homeLink = document.getElementById("homeLink");
+  const profileLink = document.getElementById("profileLink");
 
   if (Status == "home") {
     postsWrapper.classList.remove("d-none");
     onePostDetails.classList.add("d-none");
+    userProfilePage.classList.add("d-none");
     addPost.classList.remove("d-none");
-  } else {
+    switchToHome.classList.add("d-none");
+    homeLink.classList.add("active");
+  } else if (Status == "postPage") {
     postsWrapper.classList.add("d-none");
     onePostDetails.classList.remove("d-none");
+    userProfilePage.classList.add("d-none");
     addPost.classList.add("d-none");
+    switchToHome.classList.remove("d-none");
+  } else if (Status == "userProfilePage") {
+    userProfilePage.classList.remove("d-none");
+    postsWrapper.classList.add("d-none");
+    onePostDetails.classList.add("d-none");
+    switchToHome.classList.remove("d-none");
+    profileLink.classList.add("active");
   }
 }
 
@@ -577,5 +681,184 @@ async function sendComment(postId) {
     }
   } catch (error) {
     alertComponent(`${error} 😶`, "warning");
+  }
+}
+
+// switch to home page
+
+document.getElementById("switchToHome").addEventListener("click", () => {
+  switchPages("home");
+});
+
+// handle User Profile Page
+
+function handleProfilePage(authorId) {
+  switchPages("userProfilePage");
+  const userProfilePage = document.getElementById("userProfilePage");
+  let user;
+
+  if (!authorId) {
+    user = JSON.parse(localStorage.getItem("user"));
+    authorId = user.id;
+    createUserInfo();
+    createUserPosts();
+  } else {
+    (async () => {
+      try {
+        let response = await fetch(
+          `https://tarmeezacademy.com/api/v1/users/${authorId}`
+        );
+        let json = await response.json();
+        user = json.data;
+        createUserInfo();
+        createUserPosts();
+      } catch (error) {
+        alert(error);
+      }
+    })();
+  }
+
+  function createUserInfo() {
+    userProfilePage.innerHTML = `
+    <div
+    class="user-info d-flex flex-wrap align-items-center gap-5 bg-light p-4 shadow rounded-3"
+    >
+      <div class="user-img">
+        <img
+          class="user-pro-pic"
+          src="${
+            typeof user.profile_image == "object"
+              ? "./images/anonymous-user.jpg"
+              : user.profile_image
+          }"
+          alt="user picture"
+        />
+      </div>
+      <div class="user-details d-flex flex-column" style="flex-grow: 1">
+        <h3 class=" fw-bold fs-5">
+          ${user.email}
+        </h3>
+        <h2 class="fs-4 fw-bold">
+          ${user.username}
+        </h2>
+        <h3 class=" fw-bold fs-5">
+          ${user.name}
+        </h3>
+      </div>
+      <div class="user-post-count" style="flex-grow: 1">
+      <p class="text-muted m-0">
+        <span class="fs-2 fw-bold text-dark">${user.posts_count} </span>Posts
+      </p>
+      <p class="text-muted m-0">
+        <span class="fs-2 fw-bold text-dark">${
+          user.comments_count
+        } </span>Comments
+      </p>
+      </div>
+    </div>
+   `;
+  }
+
+  async function createUserPosts() {
+    try {
+      let response = await fetch(
+        `https://tarmeezacademy.com/api/v1/users/${authorId}/posts`
+      );
+      let json = await response.json();
+      showData(json.data);
+      chekerLogged()
+      handlePostEdit();
+    } catch (error) {
+      alert("error");
+    }
+
+    function showData(posts) {
+      const div = document.createElement("div");
+
+      posts.forEach((post) => {
+        if (
+          JSON.stringify(post).includes("script") ||
+          JSON.stringify(post).includes("alert")
+        ) {
+          return;
+        }
+
+        div.innerHTML += `
+        <div  class="card my-4 shadow-sm">
+          <div class="mt-3 d-flex align-items-center">
+            <span onclick="handleProfilePage(${post.author.id})">
+              <img
+                src="${
+                  typeof post.author.profile_image !== "object"
+                    ? post.author.profile_image
+                    : "./images/anonymous-user.jpg"
+                }"
+                alt="Profile"
+                class="Profile-img ms-3 "
+              />
+              <span class="ms-2 align-middle fs-4 fw-bold">@${
+                post.author.username
+              }</span>
+            </span>
+            <div 
+            data-current-post-id="${post.id}" 
+            data-current-post-title="${post.title}" 
+            data-current-post-body="${post.body}"  
+            data-author-id='${
+              post.author.id
+            }' class="px-3 align-items-center editBtn" style="flex-grow:1; display:flex; justify-content:end; ">
+            
+            <button class="btn btn-sm btn-primary">
+              edit
+              <i class="fa-solid fa-pen-clip" style="color: #d4d6d8;"></i>
+            </button>
+            
+            <button class="mx-1 btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal">
+              delete
+              <i class="fa-regular fa-trash-can" style="color: #d4d6d8;"></i>
+            </button>
+    
+            </div>
+          </div>
+          <hr />
+          <div title='single post page'
+          onclick="postDetailsReq(${post.id})"
+          class="d-flex justify-content-center"
+          style="background: #F1F1F1">
+              <img
+                  src="${post.image}"
+                  class="  card-img-top rounded-3 ${
+                    typeof post.image !== "object" ? "" : "d-none"
+                  }"
+                  style="max-height: 370px; max-width: 98%; object-fit: contain; cursor:pointer;"
+              />
+          </div>    
+          <div class="card-body">
+            <h6 onclick="postDetailsReq(${
+              post.id
+            })" title='single post page' style='cursor:pointer;' class="card-title text-black-50">${
+          post.created_at
+        }</h6>
+            <h4 style='cursor:pointer;' onclick="postDetailsReq(${post.id})" >${
+          post.title || ""
+        }</h4>
+            <p onclick="postDetailsReq(${
+              post.id
+            })" style='cursor:pointer;' class="card-text">
+              ${post.body}
+            </p>
+            <hr />
+            <div>
+              <i class="fa-solid fa-pen fa-flip-horizontal text-black-50"></i>
+              <span>${post.comments_count} comments</span>
+            </div>
+          </div>            
+        </div>
+        
+        `;
+      });
+
+      userProfilePage.append(div);
+    }
   }
 }

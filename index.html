@@ -30,62 +30,7 @@
       referrerpolicy="no-referrer"
     />
 
-    <style>
-      body {
-        background-color: #e6e6e6;
-      }
-
-      .navbar-toggler {
-        border: none;
-        outline: none;
-        &:focus {
-          box-shadow: none;
-          border: 1px solid #c3bfbf;
-        }
-      }
-
-      /* .navbar-collapse.collapse.show {
-        display: flex;
-        flex-direction: column-reverse;
-        align-items: start;
-      } */
-
-      #postsWrapper.container,
-      #onePostDetails.container {
-        width: 65%;
-      }
-
-      @media (max-width: 767px) {
-        #postsWrapper.container,
-        #onePostDetails.container {
-          width: 100%;
-        }
-      }
-
-      .Profile-img {
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #eee;
-        box-shadow: 0 0 4px #00000069;
-      }
-
-      .hide {
-        display: none;
-      }
-      .show {
-        display: block;
-      }
-
-      [title="add post"] {
-        transition: all 0.7s;
-      }
-
-      [title="add post"]:hover i {
-        color: #e6e6e6;
-      }
-    </style>
+    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <!-- login modal  -->
@@ -147,7 +92,7 @@
         </div>
       </div>
     </div>
-    <!-- login modal  -->
+    <!-- # login modal  -->
 
     <!-- register modal  -->
     <div
@@ -222,7 +167,7 @@
         </div>
       </div>
     </div>
-    <!-- register modal  -->
+    <!-- # register modal  -->
 
     <!-- create post modal -->
     <div
@@ -289,9 +234,47 @@
         </div>
       </div>
     </div>
-    <!-- create post modal -->
+    <!-- # create post modal -->
 
-    <!--  end modals  -->
+    <!-- delete poost modal -->
+    <div
+      class="modal fade"
+      id="deletePostModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Delete Post</h1>
+            <button
+              id="closeDeleteModal"
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body fw-bold">Are you sure 🤔 .. ?</div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button id="acceptDelete" type="button" class="btn btn-danger">
+              Delete 👊
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- # delete poost modal -->
+
+    <!-- end modals  -->
 
     <!-- alerts -->
     <div
@@ -307,86 +290,120 @@
       data-bs-toggle="modal"
       data-bs-target="#createPostModal"
       title="add post"
-      class="d-none rounded-2 py-2 btn btn-outline-primary shadow-sm position-fixed"
-      style="bottom: 50px; right: 3svw; z-index: 99999"
+      class="d-none rounded-2 py-1 btn btn-outline-primary shadow position-fixed"
+      style="bottom: 100px; right: 3.7svw; z-index: 99999"
     >
-      <i class="fa-solid fa-pen-to-square" style="font-size: 25px"></i>
+      <i class="fa-solid fa-pen-to-square" style="font-size: 18px"></i>
     </div>
     <!-- add post btn -->
 
-    <div class="container mb-5 sticky-top">
-      <nav class="navbar navbar-expand-lg bg-light rounded-bottom shadow">
-        <div class="container-fluid">
-          <a class="navbar-brand" style="cursor: pointer" href="/">ElKonz</a>
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-              <li id="goToHome" class="nav-item">
-                <a
-                  class="nav-link active"
-                  aria-current="page"
-                  style="cursor: pointer"
-                  onclick="switchPages('home')"
-                  >Home</a
-                >
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Profile</a>
-              </li>
-            </ul>
-            <div id="loginAndRegister" class="ms-auto">
-              <button
-                type="button"
-                class="btn btn-outline-success mx-1"
-                data-bs-toggle="modal"
-                data-bs-target="#loginMoadl"
-              >
-                log in
-              </button>
-              <button
-                type="button"
-                class="btn btn-outline-primary mx-1"
-                data-bs-toggle="modal"
-                data-bs-target="#registerModal"
-              >
-                register
-              </button>
-            </div>
+    <!-- go To Home btn -->
+    <div
+      id="switchToHome"
+      title="Go To Home"
+      class="d-none rounded-2 py-1 btn btn-outline-primary shadow position-fixed"
+      style="bottom: 100px; left: 3.7svw; z-index: 99999"
+    >
+      <i class="fa-solid fa-home" style="font-size: 15px"></i>
+    </div>
+    <!-- go To Home btn -->
 
-            <div
-              id="checkIfUser"
-              class="d-flex flex-wrap align-items-center gap-3 ms-auto"
+    <!-- nav -->
+    <div class="container-fluid bg-light shadow">
+      <div class="container mb-5 sticky-top">
+        <nav class="navbar navbar-expand-lg">
+          <div class="container-fluid">
+            <a class="navbar-brand fw-bold" style="cursor: pointer" href="/"
+              >ElKonz</a
             >
-              <img
-                id="profileImg"
-                class="Profile-img"
-                src="./images/anonymous-user.jpg"
-                alt="Profile"
-              />
-              <h2 id="userName" class="h3 m-0"></h2>
-              <button
-                id="logout"
-                type="button"
-                class="hide ms-auto btn btn-sm btn-outline-danger mx-1"
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarNav"
+              aria-controls="navbarNav"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav">
+                <li id="goToHome" class="nav-item mx-1 fw-bold">
+                  <a
+                    id="homeLink"
+                    class="nav-link active"
+                    aria-current="page"
+                    style="cursor: pointer"
+                    onclick="switchPages('home')"
+                    >Home</a
+                  >
+                </li>
+                <li class="nav-item mx-1 fw-bold">
+                  <a
+                    id="profileLink"
+                    onclick="handleProfilePage()"
+                    class="nav-link"
+                  >
+                    Profile
+                  </a>
+                </li>
+              </ul>
+              <div id="loginAndRegister" class="ms-auto">
+                <button
+                  type="button"
+                  class="btn btn-outline-success mx-1"
+                  data-bs-toggle="modal"
+                  data-bs-target="#loginMoadl"
+                >
+                  log in
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-primary mx-1"
+                  data-bs-toggle="modal"
+                  data-bs-target="#registerModal"
+                >
+                  register
+                </button>
+              </div>
+
+              <div
+                id="checkIfUser"
+                class="d-flex flex-wrap align-items-center gap-3 ms-auto"
               >
-                log out 🖐️
-              </button>
+                <img
+                  style="cursor: pointer;"
+                  onclick="handleProfilePage()"
+                  id="profileImg"
+                  class="Profile-img"
+                  src="./images/anonymous-user.jpg"
+                  alt="Profile"
+                />
+                <h2 
+                style="cursor: pointer;"
+                onclick="handleProfilePage()" 
+                id="userName"
+                class="h3 m-0"
+                 ></h2>
+                <button
+                  id="logout"
+                  type="button"
+                  class="hide ms-auto btn btn-sm btn-outline-danger mx-1"
+                >
+                  log out 🖐️
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
     </div>
-    <!-- end nav -->
+    <!-- nav -->
+
+    <!-- user profile page -->
+    <div id="userProfilePage" class="container px-2 d-none"></div>
+    <!-- user profile page -->
 
     <!-- postsWrapper -->
     <div id="postsWrapper" class="container"></div>
