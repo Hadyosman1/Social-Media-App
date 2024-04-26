@@ -62,38 +62,120 @@ body {
 }
 
 .user-pro-pic {
-    width: 120px;
-    aspect-ratio: 1/1;
-    border-radius: 50%;
-    box-shadow: 0 0 13px #00000028;
-    object-fit: contain;
-    max-width: 100%;
+  width: 120px;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  box-shadow: 0 0 13px #00000028;
+  object-fit: contain;
+  max-width: 100%;
 }
 
 .nav-link.active {
-    color: #335bc2 !important;
+  color: #335bc2 !important;
 }
 
 .nav-link:hover {
-    transition: all .3s ease;
-    color: #335bc2 !important;
-    cursor: pointer;
+  transition: all 0.3s ease;
+  color: #335bc2 !important;
+  cursor: pointer;
 }
 
-@media (min-width:992px) {
-    .nav-link.active {
-        border-bottom: 2px solid #335bc2;
-    }
-    
-    .nav-link:hover {
-        scale: 1.1;
-    } 
+@media (min-width: 992px) {
+  .nav-link.active {
+    border-bottom: 2px solid #335bc2;
+  }
+
+  .nav-link:hover {
+    scale: 1.1;
+  }
 }
 .click-to-user-page {
-    color: rgb(7, 63, 64);
-    
-    &:hover {
-        transition: color .4s ease-out;
-        color: #009DA1;
-    }
+  color: #0d2664;
+
+  &:hover {
+    transition: color 0.4s ease-out;
+    color: #335BC2;
+  }
 }
+
+/* loader */
+.loader-container {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 320px;
+    height: 320px;
+    display: grid;
+    place-items: center;
+    z-index: 1000000000;
+    background-color: #4370e4;
+    translate: -50% -50%;
+    transition: transform 80ms ease-in;
+    border-radius: 1rem;
+}
+.reset-lodaer-transform {
+    transform: translate(0, -210%) ;
+}
+.loader {
+  width: 160px;
+  height: 185px;
+  position: relative;
+  background: #fff;
+  border-radius: 100px 100px 0 0;
+}
+.loader:after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 125px;
+  left: 50%;
+  top: 25px;
+  transform: translateX(-50%);
+  background-image: radial-gradient(circle, #000 48%, transparent 55%),
+    radial-gradient(circle, #000 48%, transparent 55%),
+    radial-gradient(circle, #fff 30%, transparent 45%),
+    radial-gradient(circle, #000 48%, transparent 51%),
+    linear-gradient(#000 20px, transparent 0),
+    linear-gradient(#cfecf9 60px, transparent 0),
+    radial-gradient(circle, #cfecf9 50%, transparent 51%),
+    radial-gradient(circle, #cfecf9 50%, transparent 51%);
+  background-repeat: no-repeat;
+  background-size: 16px 16px, 16px 16px, 10px 10px, 42px 42px, 12px 3px,
+    50px 25px, 70px 70px, 70px 70px;
+  background-position: 25px 10px, 55px 10px, 36px 44px, 50% 30px, 50% 85px,
+    50% 50px, 50% 22px, 50% 45px;
+  animation: faceLift 3s linear infinite alternate;
+}
+.loader:before {
+  content: "";
+  position: absolute;
+  width: 140%;
+  height: 125px;
+  left: -20%;
+  top: 0;
+  background-image: radial-gradient(circle, #fff 48%, transparent 50%),
+    radial-gradient(circle, #fff 48%, transparent 50%);
+  background-repeat: no-repeat;
+  background-size: 65px 65px;
+  background-position: 0px 12px, 145px 12px;
+  animation: earLift 3s linear infinite alternate;
+}
+
+@keyframes faceLift {
+  0% {
+    transform: translateX(-60%);
+  }
+  100% {
+    transform: translateX(-30%);
+  }
+}
+@keyframes earLift {
+  0% {
+    transform: translateX(10px);
+  }
+  100% {
+    transform: translateX(0px);
+  }
+}
+
+/* loader */

@@ -1,5 +1,17 @@
 let Status = "home";
 
+function handleLodaer (loaderStatus = "hide") {
+  const loaderContainer = document.querySelector('.loader-container');
+
+  if (loaderStatus == "hide") {
+    loaderContainer.classList.add('reset-lodaer-transform');
+  } else  {
+    loaderContainer.classList.remove('reset-lodaer-transform');
+  }
+
+}
+handleLodaer('hide');
+
 function handlePagination(metaData) {
   function scrollListener() {
     if (
@@ -18,6 +30,7 @@ function handlePagination(metaData) {
 }
 
 async function getALlPosts(currentPage = 1) {
+  handleLodaer('show');
   try {
     let response = await fetch(
       `https://tarmeezacademy.com/api/v1/posts?limit=20&page=${currentPage}`
@@ -41,6 +54,8 @@ async function getALlPosts(currentPage = 1) {
     }
   } catch (error) {
     console.log(error);
+  } finally {
+    handleLodaer('hide');
   }
 }
 getALlPosts();
@@ -142,11 +157,13 @@ const btnSubmitLogin = document.getElementById("submitLogin");
 const btnSubmitRegister = document.getElementById("submitRegister");
 
 async function loginReq(username, password) {
+
   let data = {
     username: username,
     password: password,
   };
 
+  handleLodaer('show');
   try {
     let response = await fetch("https://tarmeezacademy.com/api/v1/login", {
       method: "POST",
@@ -170,6 +187,8 @@ async function loginReq(username, password) {
     }
   } catch (error) {
     alertComponent(error + "⚠️", "warning");
+  } finally {
+    handleLodaer('hide');
   }
 }
 
@@ -190,6 +209,7 @@ async function registerReq(name, email, username, pass, profileImg) {
   formData.append("email", email);
   console.log(formData);
 
+  handleLodaer('show');
   try {
     let response = await fetch("https://tarmeezacademy.com/api/v1/register", {
       method: "POST",
@@ -213,6 +233,8 @@ async function registerReq(name, email, username, pass, profileImg) {
     }
   } catch (error) {
     alertComponent(error + "⚠️", "warning");
+  } finally {
+    handleLodaer('hide');
   }
 }
 
@@ -231,6 +253,7 @@ function chekerLogged() {
   const addPostBtn = document.querySelector('[title="add post"]');
   const checkIfUser = document.getElementById("checkIfUser");
   const addCommentBtn = document.getElementById("sendCommentInput");
+  const profileLink = document.getElementById("profileLink");
 
   if (localStorage.getItem("token")) {
     loginAndRegister.style.display = "none";
@@ -241,6 +264,7 @@ function chekerLogged() {
     addCommentBtn?.classList.remove("d-none");
     handleEditBtn();
     handleDeletePost();
+    profileLink.classList.remove('d-none');
   } else {
     loginAndRegister.style.display = "block";
     document.getElementById("logout").classList.remove("show");
@@ -249,6 +273,7 @@ function chekerLogged() {
     addCommentBtn?.classList.add("d-none");
     handleEditBtn();
     handleDeletePost();
+    profileLink.classList.add('d-none');
   }
 }
 chekerLogged();
@@ -300,6 +325,7 @@ function AcceptDeleteReq() {
 async function deleteReq(postId) {
   let token = localStorage.getItem("token");
 
+  handleLodaer('show');
   try {
     let response = await fetch(
       `https://tarmeezacademy.com/api/v1/posts/${postId}`,
@@ -329,6 +355,8 @@ async function deleteReq(postId) {
     }
   } catch (error) {
     alertComponent(`${error} ⚠️`, "warning");
+  } finally {
+    handleLodaer('hide');
   }
 }
 
@@ -425,6 +453,8 @@ async function createPostReq(title, body, imgs) {
   }
 
   if (submitPostStatus == "Create") {
+
+    handleLodaer('show');
     try {
       let response = await fetch("https://tarmeezacademy.com/api/v1/posts", {
         method: "POST",
@@ -445,13 +475,17 @@ async function createPostReq(title, body, imgs) {
       }
     } catch (error) {
       alertComponent(`${error} 😢`, "warning");
+    } finally {
+      handleLodaer('hide');
     }
+
   } else {
     let editCurrentPostId =
       document.getElementById("submitCreatePost").dataset.currentPostId;
 
     formData.append("_method", "PUT");
 
+    handleLodaer('show');
     try {
       let response = await fetch(
         `https://tarmeezacademy.com/api/v1/posts/${editCurrentPostId}`,
@@ -481,6 +515,8 @@ async function createPostReq(title, body, imgs) {
       }
     } catch (error) {
       alertComponent(`${error} 😢`, "warning");
+    } finally {
+      handleLodaer('hide');
     }
   }
 }
@@ -494,6 +530,8 @@ document.getElementById("submitCreatePost").addEventListener("click", () => {
 });
 
 async function postDetailsReq(postId) {
+  
+  handleLodaer('show');
   try {
     let response = await fetch(
       `https://tarmeezacademy.com/api/v1/posts/${postId}`
@@ -504,6 +542,8 @@ async function postDetailsReq(postId) {
     handlePostEdit();
   } catch (error) {
     console.warn(error);
+  } finally {
+    handleLodaer('hide');
   }
 }
 
@@ -656,6 +696,7 @@ async function sendComment(postId) {
     return false;
   }
 
+  handleLodaer('show');
   try {
     let response = await fetch(
       `https://tarmeezacademy.com/api/v1/posts/${postId}/comments`,
@@ -681,6 +722,8 @@ async function sendComment(postId) {
     }
   } catch (error) {
     alertComponent(`${error} 😶`, "warning");
+  } finally {
+    handleLodaer('hide');
   }
 }
 
@@ -704,6 +747,8 @@ function handleProfilePage(authorId) {
     createUserPosts();
   } else {
     (async () => {
+      
+      handleLodaer('show');
       try {
         let response = await fetch(
           `https://tarmeezacademy.com/api/v1/users/${authorId}`
@@ -714,6 +759,8 @@ function handleProfilePage(authorId) {
         createUserPosts();
       } catch (error) {
         alert(error);
+      } finally {
+        handleLodaer('hide');
       }
     })();
   }
@@ -721,7 +768,7 @@ function handleProfilePage(authorId) {
   function createUserInfo() {
     userProfilePage.innerHTML = `
     <div
-    class="user-info d-flex flex-wrap align-items-center gap-5 bg-light p-4 shadow rounded-3"
+    class="user-info d-flex flex-wrap align-items-center justify-content-evenly gap-4 bg-light p-4 shadow rounded-3"
     >
       <div class="user-img">
         <img
@@ -734,18 +781,18 @@ function handleProfilePage(authorId) {
           alt="user picture"
         />
       </div>
-      <div class="user-details d-flex flex-column" style="flex-grow: 1">
+      <div class="user-details d-flex flex-column" style="flex-basis:40%;">
         <h3 class=" fw-bold fs-5">
-          ${user.email}
+          ${user.email || ""}
         </h3>
         <h2 class="fs-4 fw-bold">
-          ${user.username}
+          ${user.username || ""}
         </h2>
         <h3 class=" fw-bold fs-5">
-          ${user.name}
+          ${user.name || ""}
         </h3>
       </div>
-      <div class="user-post-count" style="flex-grow: 1">
+      <div class="user-post-count" style="flex-basis:40%;">
       <p class="text-muted m-0">
         <span class="fs-2 fw-bold text-dark">${user.posts_count} </span>Posts
       </p>
@@ -756,10 +803,13 @@ function handleProfilePage(authorId) {
       </p>
       </div>
     </div>
+    <h2 class="my-4 fw-bold">${user.username}'s posts</h2>
    `;
   }
 
   async function createUserPosts() {
+
+    handleLodaer('show');
     try {
       let response = await fetch(
         `https://tarmeezacademy.com/api/v1/users/${authorId}/posts`
@@ -770,12 +820,15 @@ function handleProfilePage(authorId) {
       handlePostEdit();
     } catch (error) {
       alert("error");
+    } finally {
+      handleLodaer('hide');
     }
 
     function showData(posts) {
       const div = document.createElement("div");
 
       posts.forEach((post) => {
+
         if (
           JSON.stringify(post).includes("script") ||
           JSON.stringify(post).includes("alert")
